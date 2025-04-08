@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:whatsapp_clone/screens/chat_screen.dart';
 
+// Chat model representing a single chat
 class Chat {
-  final String senderName;
-  final String senderAvatarUrl;
-  String lastMessage;
-  final DateTime timestamp;
-  final int unreadCount;
-  final bool isArchived;
-  final bool isLocked;
-  final bool isGroup;
-  List<Message> messages;
+  final String senderName; // Name of the sender
+  final String senderAvatarUrl; // Avatar URL of the sender
+  String lastMessage; // Last message in the chat
+  final DateTime timestamp; // Timestamp of the last message
+  final int unreadCount; // Number of unread messages
+  final bool isArchived; // Whether the chat is archived
+  final bool isLocked; // Whether the chat is locked
+  final bool isGroup; // Whether the chat is a group chat
+  List<Message> messages; // List of messages in the chat
+
   Chat({
     required this.senderName,
     required this.senderAvatarUrl,
@@ -25,12 +27,13 @@ class Chat {
   });
 }
 
-//  simple Message model
+// Message model representing a single message
 class Message {
-  final String senderName;
-  final String text;
-  final DateTime timestamp;
-  final bool isMe;
+  final String senderName; // Name of the sender
+  final String text; // Text content of the message
+  final DateTime timestamp; // Timestamp of the message
+  final bool isMe; // Whether the message was sent by the user
+
   Message({
     required this.senderName,
     required this.text,
@@ -39,6 +42,7 @@ class Message {
   });
 }
 
+// Sample chat data for demonstration
 final List<Chat> sampleChats = [
   Chat(
     senderName: 'Eric',
@@ -143,24 +147,18 @@ class ChatsScreen extends StatefulWidget {
 }
 
 class _ChatsScreenState extends State<ChatsScreen> {
-  String _filter = 'all';
+  String _filter = 'all'; // Current filter applied to the chat list
 
+  // Getter to filter chats based on the selected filter
   List<Chat> get _filteredChats {
     List<Chat> chats = sampleChats;
     if (_filter == 'unread') {
-      chats = chats.where((chat) => chat.unreadCount > 0).toList();
+      chats = chats.where((chat) => chat.unreadCount > 0).toList(); // Filter unread chats
     } else if (_filter == 'groups') {
-      chats = chats.where((chat) => chat.isGroup).toList();
+      chats = chats.where((chat) => chat.isGroup).toList(); // Filter group chats
     } else if (_filter == 'favorites') {
-      chats =
-          chats
-              .where(
-                (chat) =>
-                    chat.unreadCount == 0 && !chat.isGroup && chat.isLocked,
-              )
-              .toList();
+      chats = chats.where((chat) => chat.unreadCount == 0 && !chat.isGroup && chat.isLocked).toList(); // Filter favorite chats
     }
-
     return chats;
   }
 
@@ -169,36 +167,41 @@ class _ChatsScreenState extends State<ChatsScreen> {
     return Scaffold(
       body: Column(
         children: [
+          // Filter buttons
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildFilterButton('All', 'all'),
-                _buildFilterButton('Unread', 'unread'),
-                _buildFilterButton('Starred', 'starred'),
-                _buildFilterButton('Archived', 'archived'),
+                _buildFilterButton('All', 'all'), // Button for "All" filter
+                _buildFilterButton('Unread', 'unread'), // Button for "Unread" filter
+                _buildFilterButton('Starred', 'starred'), // Button for "Starred" filter
+                _buildFilterButton('Archived', 'archived'), // Button for "Archived" filter
               ],
             ),
           ),
-          const Divider(height: 1.0, color: Colors.grey),
-          Expanded(child: ListView.builder(
-              itemCount: _filteredChats.length,
-              itemBuilder: (context, index){
-            final chat = _filteredChats[index];
-            return _buildChatItem(chat, context);
-          }))
+          const Divider(height: 1.0, color: Colors.grey), // Divider line
+          // List of chats
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredChats.length, // Number of filtered chats
+              itemBuilder: (context, index) {
+                final chat = _filteredChats[index];
+                return _buildChatItem(chat, context); // Build each chat item
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Filter button widget
+  // Widget to build a filter button
   Widget _buildFilterButton(String label, String filterValue) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _filter = filterValue;
+          _filter = filterValue; // Update the filter when button is tapped
         });
       },
       child: Padding(
@@ -206,29 +209,26 @@ class _ChatsScreenState extends State<ChatsScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: _filter == filterValue ? Colors.green : Colors.grey,
-            fontWeight:
-                _filter == filterValue ? FontWeight.bold : FontWeight.normal,
+            color: _filter == filterValue ? Colors.green : Colors.grey, // Highlight selected filter
+            fontWeight: _filter == filterValue ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),
     );
   }
 
-  // Chat item widget
+  // Widget to build a chat item
   Widget _buildChatItem(Chat chat, BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => ChatScreen(
-                  // Use the ChatScreen widget
-                  chatName: chat.senderName,
-                  chatAvatarUrl: chat.senderAvatarUrl,
-                  messages: chat.messages, // Pass the messages to the ChatScreen
-                ),
+            builder: (context) => ChatScreen(
+              chatName: chat.senderName, // Pass chat name to ChatScreen
+              chatAvatarUrl: chat.senderAvatarUrl, // Pass avatar URL to ChatScreen
+              messages: chat.messages, // Pass messages to ChatScreen
+            ),
           ),
         );
       },
@@ -239,7 +239,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
             // Avatar
             CircleAvatar(backgroundImage: NetworkImage(chat.senderAvatarUrl)),
             const SizedBox(width: 12.0),
-            // Chat details (name, last message, time)
+            // Chat details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,59 +250,38 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         child: Text(
                           chat.senderName,
                           style: TextStyle(
-                            fontWeight:
-                                chat.unreadCount > 0
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                            fontWeight: chat.unreadCount > 0 ? FontWeight.bold : FontWeight.normal, // Bold if unread
                           ),
                         ),
                       ),
-                      // Time
+                      // Timestamp
                       Text(
                         _formatTimestamp(chat.timestamp),
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12.0,
-                        ),
+                        style: const TextStyle(color: Colors.grey, fontSize: 12.0),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4.0),
                   Row(
                     children: [
-                      //Show lock
-                      if (chat.isLocked)
-                        const Icon(Icons.lock, color: Colors.grey, size: 12),
-                      // Last message and ticks
+                      if (chat.isLocked) const Icon(Icons.lock, color: Colors.grey, size: 12), // Lock icon if chat is locked
                       Expanded(
                         child: Text(
                           chat.lastMessage,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color:
-                                chat.unreadCount > 0
-                                    ? Colors.black
-                                    : Colors.grey,
-                          ),
+                          overflow: TextOverflow.ellipsis, // Ellipsis for long messages
+                          style: TextStyle(color: chat.unreadCount > 0 ? Colors.black : Colors.grey),
                         ),
                       ),
-                      // Unread count badge
                       if (chat.unreadCount > 0)
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6.0,
-                            vertical: 2.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
                           decoration: BoxDecoration(
                             color: Colors.green,
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Text(
                             chat.unreadCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.0,
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 12.0),
                           ),
                         ),
                     ],
@@ -316,17 +295,17 @@ class _ChatsScreenState extends State<ChatsScreen> {
     );
   }
 
-  // Function to format timestamp
+  // Function to format timestamp for display
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
 
     if (difference.inDays > 1) {
-      return DateFormat('dd/MM/yyyy').format(timestamp); // e.g., 01/01/2023
+      return DateFormat('dd/MM/yyyy').format(timestamp); // Format as date if older than a day
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return 'Yesterday'; // Show "Yesterday" if one day old
     } else {
-      return DateFormat('h:mm a').format(timestamp); // e.g., 10:30 AM
+      return DateFormat('h:mm a').format(timestamp); // Format as time for today
     }
   }
 }
